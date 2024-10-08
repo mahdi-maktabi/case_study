@@ -1,6 +1,6 @@
 ---
 title: "Case Study"
-output: github_document
+output: html_document
 date: "2024-10-08"
 ---
 
@@ -9,6 +9,7 @@ Load key packages and dataset.
 ```{r}
 library(tidyverse)
 library(p8105.datasets)
+library(leaflet)
 
 data(nyc_airbnb)
 ```
@@ -98,5 +99,20 @@ nyc_airbnb |>
   ggplot(aes(x = neighbourhood, y = price)) + 
   geom_violin() +
   theme(axis.text = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+
+```{r}
+pal <- colorNumeric(
+  palette = "viridis",
+  domain = nyc_airbnb$review_scores_location)
+
+nyc_airbnb |> 
+  filter(
+    neighbourhood_group == "Manhattan", 
+         price < 1000) |>
+  leaflet() |> 
+  addProviderTiles(providers$CartoDB.Positron) |> 
+  addCircleMarkers(~lat, ~long, color = ~ pal(review_scores_location, radius = 2))
 ```
 
