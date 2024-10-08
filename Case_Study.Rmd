@@ -7,6 +7,7 @@ date: "2024-10-08"
 Load key packages and dataset.
 
 ```{r}
+library(tidyverse)
 library(p8105.datasets)
 
 data(nyc_airbnb)
@@ -25,3 +26,77 @@ data(nyc_airbnb)
   * Popularity = number of units? Average price?
 * Are there repeat hosts?
   * If so, what does that mean?
+* How does price of unit change based on distance to Times Square?
+* What is the relationship between minimum number of nights and reviews?
+* What is the relationship between reviews and neighborhood?
+
+
+```{r}
+nyc_airbnb |>
+  summarize (max_price = max (price))
+nyc_airbnb |>
+  summarize (min_price = min (price))
+nyc_airbnb |>
+  summarize (ave_price = mean (price))
+```
+
+```{r}
+nyc_airbnb %>%
+  ggplot(aes(x = price, fill = neighbourhood_group)) +
+  geom_histogram() +
+  facet_grid(. ~ neighbourhood_group) +
+  scale_x_continuous(limits = c(0, 250))
+```
+
+
+```{r}
+nyc_airbnb %>%
+  filter(calculated_host_listings_count > 34)
+```
+
+
+```{r}
+nyc_airbnb %>%
+  group_by(neighbourhood_group) %>%
+  summarise(total_reviews = sum(number_of_reviews, na.rm = TRUE)) %>%
+  arrange(desc(total_reviews))
+```
+
+
+```{r}
+nyc_airbnb |> 
+  ggplot(aes(x = review_scores_location, y = price)) + 
+  geom_point()
+```
+
+
+```{r}
+nyc_airbnb |> 
+  filter(neighbourhood_group == "Manhattan", 
+         price < 1000) |> 
+  ggplot(aes(x = lat, y = long, color = price)) + 
+  geom_point(alpha = .1)
+```
+
+```{r}
+nyc_airbnb |> 
+  filter(neighbourhood_group == "Manhattan", 
+         price < 1000, 
+         room_type == "Entire home/apt") |>
+  group_by(neighbourhood) |> 
+  summarize(mean_price = mean(price)) |> 
+  arrange(desc(mean_price))
+  
+```
+
+```{r}
+nyc_airbnb |> 
+  filter(neighbourhood_group == "Manhattan", 
+         price < 1000, 
+         room_type == "Entire home/apt") |>
+  mutate(neighbourhood = fct_reorder(neighbourhood, price)) |> 
+  ggplot(aes(x = neighbourhood, y = price)) + 
+  geom_violin() +
+  theme(axis.text = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
